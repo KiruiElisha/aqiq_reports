@@ -232,7 +232,7 @@ fixtures = [
     {
         "dt": "Report",
         "filters": [
-            ["name", "in", ["Production Status", "Production Variance"]]
+            ["name", "in", ["Production Status", "Production Variance","Customer Statement Details"]]
         ]
     }
 ]
