@@ -749,19 +749,38 @@ def get_result_as_list(data, filters):
         d["bill_no"] = inv_details.get(d.get("against_voucher"), "")
 
         if d.get("voucher_type") == "Sales Invoice":
-            d["ref_number"] = frappe.db.get_value(
-                "Sales Invoice", {"name": d.get("voucher_no")}, "lisec_inv_no"
-            )
+            # Check if lisec_inv_no exists before querying
+            if frappe.db.has_column("Sales Invoice", "lisec_inv_no"):
+                d["ref_number"] = frappe.db.get_value(
+                    "Sales Invoice", 
+                    d.get("voucher_no"), 
+                    "lisec_inv_no"
+                ) or d.get("voucher_no")
+            else:
+                d["ref_number"] = d.get("voucher_no")
+
         elif d.get("voucher_type") == "Payment Entry":
-            payment_vals = frappe.db.get_value("Payment Entry", {"name": d.get("voucher_no")}, ["reference_date", "mode_of_payment", "reference_no"],as_dict=True)
-            d["ref_number"] = payment_vals.reference_no or ""
-            d["chq_ref_date"] = payment_vals.reference_date or ""
-            d["mode_of_payment"] = payment_vals.mode_of_payment or ""
-            d["cheque_no"] = payment_vals.reference_no or ""
+            try:
+                payment_vals = frappe.db.get_value(
+                    "Payment Entry",
+                    d.get("voucher_no"),
+                    ["reference_date", "mode_of_payment", "reference_no"],
+                    as_dict=True
+                ) or {}
+                
+                d["ref_number"] = payment_vals.get("reference_no", "")
+                d["chq_ref_date"] = payment_vals.get("reference_date", "")
+                d["mode_of_payment"] = payment_vals.get("mode_of_payment", "")
+                d["cheque_no"] = payment_vals.get("reference_no", "")
+            except Exception:
+                # Fallback values if query fails
+                d["ref_number"] = d.get("voucher_no", "")
+                d["chq_ref_date"] = ""
+                d["mode_of_payment"] = ""
+                d["cheque_no"] = ""
 
         if d.get("voucher_type") == "Purchase Invoice":
-            d["voucher_no"] = d["bill_no"]
-
+            d["voucher_no"] = d["bill_no"] or d.get("voucher_no", "")
 
     return data
 
