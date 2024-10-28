@@ -1,45 +1,190 @@
 <meta name="pdfkit-orientation" content="Portrait">
 <style>
-    body { font-family: Arial, sans-serif; color: #333; line-height: 1.6; }
-    .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 20px; }
-    .header { border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 20px; }
-    .customer-info { display: flex; justify-content: space-between; margin-bottom: 20px; }
-    .table { width: 100%; border-collapse: separate; border-spacing: 0; margin-bottom: 20px; box-shadow: 0 2px 3px rgba(0,0,0,0.1); }
-    .table th, .table td { border: none; padding: 12px; text-align: left; }
-    .table th { background-color: #007bff; color: white; font-weight: bold; text-transform: uppercase; font-size: 0.9em; }
-    .table tr:nth-child(even) { background-color: #f8f9fa; }
-    .table tr:hover { background-color: #e9ecef; }
-    .text-right { text-align: right; }
-    .bg-light { background-color: #f8f9fa; }
-    .summary-table { margin-top: 20px; }
-    .summary-table th { background-color: #007bff; color: white; }
-    .table-bordered { border: 1px solid #dee2e6; }
-    .table-bordered th, .table-bordered td { border: 1px solid #dee2e6; }
-    .table-sm th, .table-sm td { padding: 8px; }
+    :root {
+        --primary-color: #2490EF;
+        --border-color: #E2E8F0;
+        --bg-light: #F8FAFC;
+        --text-dark: #1F272E;
+        --text-muted: #4C5A67;
+    }
+
+    .report-container {
+        margin: 0 auto;
+        padding: 15px;
+        width: 92%;
+        background: white;
+    }
+
+    .company-header {
+        margin-bottom: 1.5rem;
+        text-align: center;
+        padding: 1rem 0;
+        border-bottom: 2px solid var(--primary-color);
+    }
+
+    .statement-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background-color: var(--bg-light);
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+    }
+
+    .customer-info, .financial-info {
+        flex: 1;
+        padding: 0 1rem;
+    }
+
+    .info-item {
+        margin: 0.75rem 0;
+        display: flex;
+        align-items: center;
+    }
+
+    .info-label {
+        min-width: 120px;
+        color: var(--text-muted);
+        font-weight: 600;
+    }
+
+    .info-value {
+        color: var(--text-dark);
+    }
+
+    .transactions-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin-bottom: 1.5rem;
+        font-size: 0.875rem;
+    }
+
+    .transactions-table th {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 0.75rem;
+        font-weight: 500;
+        text-align: left;
+        border: 1px solid var(--border-color);
+    }
+
+    .transactions-table td {
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        color: var(--text-dark);
+    }
+
+    .transactions-table tr:nth-child(even) {
+        background-color: var(--bg-light);
+    }
+
+    .summary-section {
+        display: flex;
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .summary-table {
+        flex: 1;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        overflow: hidden;
+    }
+
+    .summary-table th {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 0.75rem;
+        font-weight: 500;
+        text-align: center;
+    }
+
+    .summary-table td {
+        padding: 0.75rem;
+        border-top: 1px solid var(--border-color);
+        text-align: center;
+    }
+
+    .text-right {
+        text-align: right;
+        font-family: monospace;
+    }
+
+    .text-bold {
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+
+    .amount-cell {
+        font-variant-numeric: tabular-nums;
+    }
+
+    @media print {
+        .report-container {
+            width: 100%;
+            padding: 10px;
+        }
+        .transactions-table,
+        .summary-table {
+            page-break-inside: avoid;
+        }
+        .transactions-table th,
+        .summary-table th {
+            background-color: #f1f3f5 !important;
+            color: var(--text-dark) !important;
+            -webkit-print-color-adjust: exact;
+        }
+        .statement-header {
+            background-color: transparent !important;
+        }
+    }
 </style>
 
-<div class="container">
-    <div class="header">
-        <div>{%= (data[data.length - 1].headers) %} </div>
+<div class="report-container">
+    <div class="company-header">
+        {%= data[data.length - 1].headers %}
     </div>
 
-    <div class="customer-info">
-        <div>
-            <div> {%= filters.party_type %} : {%= filters.party_name %} </div>
-            <div> {%= __("Email ID ") %} : {%= (data[data.length - 1].customer_personal_detial["email_id"]) %} </div>
-            <div> {%= __("PIN# ") %} : {%= (data[data.length - 1].customer_personal_detial["pincode"]) %} </div>
-            {% if (data[data.length - 1].customer_personal_detial["phone"]) %}
-            <div> {%= __("Phone ") %} : {%= (data[data.length - 1].customer_personal_detial["phone"]) %} </div>
-            {% endif %}
+    <div class="statement-header">
+        <div class="customer-info">
+            <div class="info-item">
+                <span class="info-label">{%= filters.party_type %}:</span>
+                <span class="info-value">{%= filters.party_name %}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Email:</span>
+                <span class="info-value">{%= data[data.length - 1].customer_personal_detial["email_id"] %}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">PIN#:</span>
+                <span class="info-value">{%= data[data.length - 1].customer_personal_detial["pincode"] %}</span>
+            </div>
+            {% if (data[data.length - 1].customer_personal_detial["phone"]) { %}
+            <div class="info-item">
+                <span class="info-label">Phone:</span>
+                <span class="info-value">{%= data[data.length - 1].customer_personal_detial["phone"] %}</span>
+            </div>
+            {% } %}
         </div>
-        <div>
-            <div> {%= __("Currency ") %} : {%= (data[data.length - 1].customer_personal_detial["currency"]) %} </div>
-            <div> {%= __("Due Balance ") %} : {%= (data[data.length - 1].customer_personal_detial["due_balance"]) %} </div>
-            <div> {%= frappe.datetime.str_to_user(filters.from_date) %}--{%= frappe.datetime.str_to_user(filters.to_date) %} </div>
+        <div class="financial-info">
+            <div class="info-item">
+                <span class="info-label">Currency:</span>
+                <span class="info-value">{%= data[data.length - 1].customer_personal_detial["currency"] %}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Due Balance:</span>
+                <span class="info-value text-bold amount-cell">{%= format_currency(data[data.length - 1].customer_personal_detial["due_balance"]) %}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Period:</span>
+                <span class="info-value">{%= frappe.datetime.str_to_user(filters.from_date) %} - {%= frappe.datetime.str_to_user(filters.to_date) %}</span>
+            </div>
         </div>
     </div>
 
-    <table class="table table-sm">
+    <table class="transactions-table">
         <thead>
             <tr>
                 <th>{%= __("Date") %}</th>
@@ -56,118 +201,71 @@
         </thead>
         <tbody>
             {% for(var i=0, l=data.length; i<l-2; i++) { %}
-            <tr>
                 {% if(data[i]) { %}
-                <td>{%= frappe.datetime.str_to_user(data[i].posting_date) %}</td>
-                <td>{%= (data[i].voucher_no) %}</td>
-                <td>{%= (data[i].voucher_type) %}</td>
-                <td>{%= (data[i].against_voucher) %}</td>
-                <td>{%= (data[i].chq_ref_date) %}</td>
-                <td>{%= (data[i].mode_of_payment) %}</td>
-                <td>{%= (data[i].cheque_no) %}</td>
-                <td class="text-right">{%= format_number(data[i].debit, null, 2) %}</td>
-                <td class="text-right">{%= format_number(data[i].credit, null, 2) %}</td>
-                <td class="text-right">{%= format_number(data[i].balance, null, 2) %}</td>
+                <tr>
+                    <td>{%= frappe.datetime.str_to_user(data[i].posting_date) %}</td>
+                    <td>{%= data[i].voucher_no %}</td>
+                    <td>{%= data[i].voucher_type %}</td>
+                    <td>{%= data[i].against_voucher %}</td>
+                    <td>{%= data[i].chq_ref_date %}</td>
+                    <td>{%= data[i].mode_of_payment %}</td>
+                    <td>{%= data[i].cheque_no %}</td>
+                    <td class="text-right amount-cell">{%= format_currency(data[i].debit) %}</td>
+                    <td class="text-right amount-cell">{%= format_currency(data[i].credit) %}</td>
+                    <td class="text-right amount-cell">{%= format_currency(data[i].balance) %}</td>
+                </tr>
                 {% } %}
-            </tr>
             {% } %}
         </tbody>
     </table>
 
-    <!-- Summary tables -->
-    <div class="summary-table">
-        <h3>Summary</h3>
-        <div style="display: flex; justify-content: space-between;">
-            <table class="table table-sm table-bordered" style="width: 48%;">
-                <thead>
-                    <tr>
-                        <th colspan="2">Transaction Summary</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>{%= filters.party_type == "Customer" ? "Debit" : "Credit" %}</td>
-                        <td class="text-right">{%= format_number(data[data.length - 1].debit, null, 2) %}</td>
-                    </tr>
-                    <tr>
-                        <td>{%= filters.party_type == "Customer" ? "Sales Return" : "Purchase Return" %}</td>
-                        <td class="text-right">{%= format_number(data[data.length - 1].sales_to_return, null, 2) %}</td>
-                    </tr>
-                    <tr>
-                        <td>Credit</td>
-                        <td class="text-right">{%= format_number(data[data.length - 1].credit, null, 2) %}</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Balance Amount</strong></td>
-                        <td class="text-right"><strong>{%= format_number(data[data.length - 1].balance, null, 2) %}</strong></td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <table class="table table-sm table-bordered" style="width: 48%;">
-                <thead>
-                    <tr>
-                        <th colspan="5">Ageing Summary</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>30 Days</td>
-                        <td>60 Days</td>
-                        <td>90 Days</td>
-                        <td>120 Days</td>
-                        <td>Above</td>
-                    </tr>
-                    <tr>
-                        <td>{%= format_number(data[data.length - 1].ageing_data["30"], null, 2) %}</td>
-                        <td>{%= format_number(data[data.length - 1].ageing_data["60"], null, 2) %}</td>
-                        <td>{%= format_number(data[data.length - 1].ageing_data["90"], null, 2) %}</td>
-                        <td>{%= format_number(data[data.length - 1].ageing_data["120"], null, 2) %}</td>
-                        <td>{%= format_number(data[data.length - 1].ageing_data["above"], null, 2) %}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- PD cheques Summary -->
-    <div class="summary-table">
-        <h3>PD Cheques Summary</h3>
-        <table class="table table-sm table-bordered">
+    <div class="summary-section">
+        <table class="summary-table">
             <thead>
                 <tr>
-                    <th>Date</th>
-                    <th>Voucher No</th>
-                    <th>CHQ Date</th>
-                    <th>CHQ No</th>
-                    <th>Cheque Amount</th>
+                    <th colspan="2">Transaction Summary</th>
                 </tr>
             </thead>
             <tbody>
-                {% for(var i=0, l= (data[data.length - 1].cheque_list).length; i<l; i++) { %}
                 <tr>
-                    <td>{%= ( data[data.length - 1].cheque_list[i]["pd_posting_date"] ) %}</td>
-                    <td>{%= ( data[data.length - 1].cheque_list[i]["pd_cheque_name"] ) %}</td>
-                    <td>{%= ( data[data.length - 1].cheque_list[i]["pd_reference_date"] ) %}</td>
-                    <td>{%= ( data[data.length - 1].cheque_list[i]["pd_reference_no"] ) %}</td>
-                    <td class="text-right">{%= format_number( data[data.length -1].cheque_list[i]["p_paid_amount"]) %}</td>
+                    <td>{%= filters.party_type == "Customer" ? "Debit" : "Credit" %}</td>
+                    <td class="text-right amount-cell">{%= format_currency(data[data.length - 1].debit) %}</td>
                 </tr>
-                {% } %}
-                <!-- Total rows -->
-                <tr class="bg-light">
-                    <td colspan="3"></td>
-                    <td>{%= ( data[data.length - 1].totals_pds["pd_reference_no"] ) %}</td>
-                    <td class="text-right">{%= format_number( data[data.length - 1].totals_pds["p_paid_amount"] ) %}</td>
+                <tr>
+                    <td>{%= filters.party_type == "Customer" ? "Sales Return" : "Purchase Return" %}</td>
+                    <td class="text-right amount-cell">{%= format_currency(data[data.length - 1].sales_to_return) %}</td>
                 </tr>
-                <tr class="bg-light">
-                    <td colspan="3"></td>
-                    <td>{%= ( data[data.length - 1].totals_balance["pd_reference_no"] ) %}</td>
-                    <td class="text-right">{%= format_number( data[data.length - 1].totals_balance["p_paid_amount"] ) %}</td>
+                <tr>
+                    <td>Credit</td>
+                    <td class="text-right amount-cell">{%= format_currency(data[data.length - 1].credit) %}</td>
                 </tr>
-                <tr class="bg-light">
-                    <td colspan="3"></td>
-                    <td>{%= ( data[data.length - 1].totals_after_pd["pd_reference_no"] ) %}</td>
-                    <td class="text-right">{%= format_number( data[data.length - 1].totals_after_pd["p_paid_amount"] ) %}</td>
+                <tr>
+                    <td class="text-bold">Balance Amount</td>
+                    <td class="text-right text-bold amount-cell">{%= format_currency(data[data.length - 1].balance) %}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <table class="summary-table">
+            <thead>
+                <tr>
+                    <th colspan="5">Ageing Summary</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>30 Days</td>
+                    <td>60 Days</td>
+                    <td>90 Days</td>
+                    <td>120 Days</td>
+                    <td>Above</td>
+                </tr>
+                <tr>
+                    <td class="amount-cell">{%= format_currency(data[data.length - 1].ageing_data["30"]) %}</td>
+                    <td class="amount-cell">{%= format_currency(data[data.length - 1].ageing_data["60"]) %}</td>
+                    <td class="amount-cell">{%= format_currency(data[data.length - 1].ageing_data["90"]) %}</td>
+                    <td class="amount-cell">{%= format_currency(data[data.length - 1].ageing_data["120"]) %}</td>
+                    <td class="amount-cell">{%= format_currency(data[data.length - 1].ageing_data["above"]) %}</td>
                 </tr>
             </tbody>
         </table>
