@@ -5,9 +5,9 @@ import frappe
 from frappe.utils import flt, formatdate
 
 def execute(filters=None):
-    columns, data = [], []
-
-    # Define columns for the report
+    if not filters:
+        filters = {}
+        
     columns = [
         {"label": "PIN of Withholdee", "fieldname": "tax_id", "fieldtype": "Data", "width": 150},
         {"label": "Invoice Number", "fieldname": "name", "fieldtype": "Link", "options": "Purchase Invoice", "width": 150},
@@ -17,6 +17,19 @@ def execute(filters=None):
         {"label": "Withholding VAT Rate (%)", "fieldname": "withholding_vat_rate", "fieldtype": "Percent", "width": 150},
         {"label": "Withholding VAT Amount (Ksh)", "fieldname": "withholding_vat_amount", "fieldtype": "Currency", "width": 180},
     ]
+
+    # Build conditions for the SQL query
+    conditions = ["pi.docstatus = 1", "pi.custom_total_withholding_vat_amount > 0"]
+    
+    if filters.get("from_date"):
+        conditions.append("pi.posting_date >= %(from_date)s")
+    if filters.get("to_date"):
+        conditions.append("pi.posting_date <= %(to_date)s")
+    if filters.get("supplier"):
+        conditions.append("pi.supplier = %(supplier)s")
+
+    # Join conditions with AND
+    where_clause = " AND ".join(conditions)
 
     # Query Purchase Invoices with proper joins and conditions
     purchase_invoices = frappe.db.sql("""
@@ -37,12 +50,12 @@ def execute(filters=None):
             ) AS payment_date
         FROM `tabPurchase Invoice` pi
         LEFT JOIN `tabPurchase Invoice Item` pii ON pii.parent = pi.name
-        WHERE pi.docstatus = 1
-            AND pi.custom_total_withholding_vat_amount > 0
+        WHERE {where_clause}
         GROUP BY pi.name
-    """, as_dict=1)
+    """.format(where_clause=where_clause), filters, as_dict=1)
 
-    # Iterate through the result set and format data for the report
+    # Format data for the report
+    data = []
     for invoice in purchase_invoices:
         data.append({
             "tax_id": invoice.tax_id,
