@@ -1,5 +1,5 @@
-# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
-# License: GNU General Public License v3. See license.txt
+# Copyright (c) 2024, RONOH and contributors
+# For license information, please see license.txt
 
 
 from collections import OrderedDict
@@ -1175,3 +1175,4 @@ def get_summary(filters):
             execute
             )
         return execute(filters)
+

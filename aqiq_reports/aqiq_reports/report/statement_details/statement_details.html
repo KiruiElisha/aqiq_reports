@@ -144,42 +144,61 @@
 
 <div class="report-container">
     <div class="company-header">
-        {%= data[data.length - 1].headers %}
+        {%= data[data.length - 1].headers || "" %}
     </div>
 
     <div class="statement-header">
         <div class="customer-info">
             <div class="info-item">
-                <span class="info-label">{%= filters.party_type %}:</span>
-                <span class="info-value">{%= filters.party_name %}</span>
+                <span class="info-label">{%= filters.party_type || "Party" %}:</span>
+                <span class="info-value">{%= filters.party_name || "" %}</span>
             </div>
             <div class="info-item">
                 <span class="info-label">Email:</span>
-                <span class="info-value">{%= data[data.length - 1].customer_personal_detial["email_id"] %}</span>
+                <span class="info-value">
+                    {%= data[data.length - 1] && data[data.length - 1].customer_personal_detial ? 
+                        (data[data.length - 1].customer_personal_detial.email_id || "N/A") : "N/A" %}
+                </span>
             </div>
             <div class="info-item">
                 <span class="info-label">PIN#:</span>
-                <span class="info-value">{%= data[data.length - 1].customer_personal_detial["pincode"] %}</span>
+                <span class="info-value">
+                    {%= data[data.length - 1] && data[data.length - 1].customer_personal_detial ? 
+                        (data[data.length - 1].customer_personal_detial.pincode || "N/A") : "N/A" %}
+                </span>
             </div>
-            {% if (data[data.length - 1].customer_personal_detial["phone"]) { %}
+            {% if (data[data.length - 1] && data[data.length - 1].customer_personal_detial && 
+                   data[data.length - 1].customer_personal_detial.phone) { %}
             <div class="info-item">
                 <span class="info-label">Phone:</span>
-                <span class="info-value">{%= data[data.length - 1].customer_personal_detial["phone"] %}</span>
+                <span class="info-value">
+                    {%= data[data.length - 1].customer_personal_detial.phone %}
+                </span>
             </div>
             {% } %}
         </div>
         <div class="financial-info">
             <div class="info-item">
                 <span class="info-label">Currency:</span>
-                <span class="info-value">{%= data[data.length - 1].customer_personal_detial["currency"] %}</span>
+                <span class="info-value">
+                    {%= data[data.length - 1] && data[data.length - 1].customer_personal_detial ? 
+                        (data[data.length - 1].customer_personal_detial.currency || "KES") : "KES" %}
+                </span>
             </div>
             <div class="info-item">
                 <span class="info-label">Due Balance:</span>
-                <span class="info-value text-bold amount-cell">{%= format_currency(data[data.length - 1].customer_personal_detial["due_balance"]) %}</span>
+                <span class="info-value text-bold amount-cell">
+                    {%= data[data.length - 1] && data[data.length - 1].customer_personal_detial ? 
+                        format_currency(data[data.length - 1].customer_personal_detial.due_balance || 0) : 
+                        format_currency(0) %}
+                </span>
             </div>
             <div class="info-item">
                 <span class="info-label">Period:</span>
-                <span class="info-value">{%= frappe.datetime.str_to_user(filters.from_date) %} - {%= frappe.datetime.str_to_user(filters.to_date) %}</span>
+                <span class="info-value">
+                    {%= frappe.datetime.str_to_user(filters.from_date) || "" %} - 
+                    {%= frappe.datetime.str_to_user(filters.to_date) || "" %}
+                </span>
             </div>
         </div>
     </div>
@@ -246,7 +265,7 @@
             </tbody>
         </table>
 
-        <table class="summary-table">
+        <!-- <table class="summary-table">
             <thead>
                 <tr>
                     <th colspan="5">Ageing Summary</th>
@@ -261,13 +280,15 @@
                     <td>Above</td>
                 </tr>
                 <tr>
-                    <td class="amount-cell">{%= format_currency(data[data.length - 1].ageing_data["30"]) %}</td>
-                    <td class="amount-cell">{%= format_currency(data[data.length - 1].ageing_data["60"]) %}</td>
-                    <td class="amount-cell">{%= format_currency(data[data.length - 1].ageing_data["90"]) %}</td>
-                    <td class="amount-cell">{%= format_currency(data[data.length - 1].ageing_data["120"]) %}</td>
-                    <td class="amount-cell">{%= format_currency(data[data.length - 1].ageing_data["above"]) %}</td>
+                    {% var ageing = (data[data.length - 1] && data[data.length - 1].ageing_data) || 
+                        {"30": 0, "60": 0, "90": 0, "120": 0, "above": 0}; %}
+                    <td class="amount-cell">{%= format_currency(ageing["30"]) %}</td>
+                    <td class="amount-cell">{%= format_currency(ageing["60"]) %}</td>
+                    <td class="amount-cell">{%= format_currency(ageing["90"]) %}</td>
+                    <td class="amount-cell">{%= format_currency(ageing["120"]) %}</td>
+                    <td class="amount-cell">{%= format_currency(ageing["above"]) %}</td>
                 </tr>
             </tbody>
-        </table>
+        </table> -->
     </div>
 </div>
