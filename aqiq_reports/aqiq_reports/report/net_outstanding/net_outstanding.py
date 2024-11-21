@@ -46,24 +46,23 @@ class NetOutstandingReport:
             "party_type": self.filters.party_type
         }
 
+        # Add party filters
         if self.filters.get("party"):
-            if self.filters.party_type == "Customer":
-                summary_filters["customer"] = self.filters.party
-            else:
-                summary_filters["supplier"] = self.filters.party
+            summary_filters["party_name" if self.filters.party_type == "Customer" else "supplier_name"] = self.filters.party
 
         if self.filters.get("party_group"):
-            if self.filters.party_type == "Customer":
-                summary_filters["customer_group"] = self.filters.party_group
-            else:
-                summary_filters["supplier_group"] = self.filters.party_group
+            summary_filters["customer_group" if self.filters.party_type == "Customer" else "supplier_group"] = self.filters.party_group
 
         # Get summary data
-        summary_data = get_summary(summary_filters)[1]
-
+        columns, summary_data = get_summary(summary_filters)
+        
         if not summary_data:
             self.data = []
             return
+
+        # Filter data based on party if specified
+        if self.filters.get("party"):
+            summary_data = [d for d in summary_data if d.party == self.filters.party]
 
         # Get party names
         parties = [d.party for d in summary_data]
